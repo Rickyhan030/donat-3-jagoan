@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enak.efoodies</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Poppins,sans-serif;}
+body{background:#fffaf5;color:#333}
+
+/* NAV */
+nav{
+background:#92402b;
+color:white;
+padding:15px;
+text-align:center;
+font-weight:bold;
+}
+
+/* HERO */
+.hero{
+text-align:center;
+padding:40px;
+background:linear-gradient(135deg,#ff7b54,#ffb26b);
+color:white;
+}
+
+/* CONTAINER */
+.container{padding:20px;max-width:1000px;margin:auto}
+
+/* PRODUCT */
+.products{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:15px;
+}
+
+.card{
+background:white;
+border-radius:15px;
+overflow:hidden;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+.card img{
+width:100%;
+height:140px;
+object-fit:cover;
+}
+
+.card h3{margin:10px}
+.card p{margin:0 10px;color:#ff7b54;font-weight:bold}
+
+.card button{
+margin:10px;
+width:90%;
+padding:8px;
+border:none;
+background:#ff7b54;
+color:white;
+border-radius:10px;
+cursor:pointer;
+}
+
+/* CART */
+.cart{
+background:white;
+margin-top:20px;
+padding:15px;
+border-radius:10px;
+}
+
+.cart li{
+display:flex;
+justify-content:space-between;
+padding:8px 0;
+border-bottom:1px solid #eee;
+}
+
+.checkout{
+width:100%;
+padding:12px;
+background:#25d366;
+color:white;
+border:none;
+border-radius:10px;
+margin-top:10px;
+cursor:pointer;
+}
+
+/* INPUT */
+input, select{
+width:100%;
+padding:10px;
+margin-top:10px;
+border-radius:8px;
+border:1px solid #ccc;
+}
+
+/* MODAL */
+#modal{
+display:none;
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+background:white;
+padding:20px;
+border-radius:20px 20px 0 0;
+box-shadow:0 -5px 20px rgba(0,0,0,0.2);
+}
+
+#modal button{
+margin:5px;
+padding:8px;
+border:none;
+background:#ff7b54;
+color:white;
+border-radius:8px;
+cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<nav>🍩 Enak.Efoodies</nav>
+
+<section class="hero">
+
+<h1>3 JAGOAN DONAT & BAKERY</h1>
+<p>Fresh dari oven ke rumahmu</p>
+</section>
+
+<div class="container">
+
+<div class="products">
+
+<div class="card">
+<img src="donathbd.jpg">
+<h3>Donat</h3>
+<p>Rp 5.000</p>
+<button onclick="openProduct(1)">Pilih</button>
+</div>
+
+<div class="card">
+<img src="bolu.jpeg">
+<h3>Bolu</h3>
+<p>Rp 120.000</p>
+<button onclick="addProduct(2)">Tambah</button>
+</div>
+
+<div class="card">
+<img src="banner-piza.jpeg">
+<h3>Pizza</h3>
+<p>Mulai Rp 25.000</p>
+<button onclick="openProduct(3)">Pilih</button>
+</div>
+
+<div class="card">
+<img src="bakery-isicoklat.jpg">
+<h3>Bolen Pisang</h3>
+<p>Rp 25.000</p>
+<button onclick="addProduct(4)">Tambah</button>
+</div>
+
+</div>
+
+<!-- CART -->
+<div class="cart">
+<h3>🛒 Keranjang</h3>
+
+<ul id="cartList"></ul>
+<h4 id="total">Total: Rp 0</h4>
+
+<input type="text" id="nama" placeholder="Nama">
+<input type="text" id="alamat" placeholder="Alamat">
+
+<select id="metode">
+<option value="COD">COD</option>
+<option value="Transfer">Transfer</option>
+</select>
+
+<button class="checkout" onclick="checkout()">Checkout WhatsApp</button>
+</div>
+
+</div>
+
+<!-- MODAL -->
+<div id="modal">
+<h3 id="modalTitle"></h3>
+<div id="variantList"></div>
+
+<br>
+<input type="number" id="qty" value="1" min="1">
+
+<br><br>
+<button onclick="confirmAdd()">Tambah</button>
+<button onclick="closeModal()">Tutup</button>
+</div>
+
+<script>
+
+/* DATA */
+const products = [
+{
+id:1,name:"Donat",type:"variant",
+variants:[
+{name:"Donat per Biji",price:5000},
+{name:"Donat isi 6",price:25000},
+{name:"Donat ulang tahun",price:100000},
+{name:"Bomboloni",price:25000}
+]},
+{id:2,name:"Bolu Besar",type:"single",price:120000},
+{
+id:3,name:"Pizza",type:"variant",
+variants:[
+{name:"Small",price:25000},
+{name:"Regular",price:45000}
+]},
+{id:4,name:"Bolen Pisang",type:"single",price:35000}
+];
+
+/* CART */
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+function save(){
+localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+/* MODAL */
+let selectedProduct=null;
+let selectedVariant=null;
+
+function openProduct(id){
+selectedProduct = products.find(p=>p.id===id);
+selectedVariant = null;
+
+modal.style.display="block";
+modalTitle.innerText=selectedProduct.name;
+
+let list = document.getElementById("variantList");
+list.innerHTML="";
+
+if(selectedProduct.type==="variant"){
+selectedProduct.variants.forEach((v,i)=>{
+list.innerHTML += `<button onclick="selectVariant(${i})">${v.name} - Rp ${v.price}</button>`;
+});
+}else{
+list.innerHTML="Tanpa varian";
+}
+}
+
+function selectVariant(i){
+selectedVariant = selectedProduct.variants[i];
+}
+
+function confirmAdd(){
+let qty = parseInt(document.getElementById("qty").value || 1);
+
+let name = selectedProduct.name;
+let price = selectedProduct.price;
+
+if(selectedVariant){
+name += " ("+selectedVariant.name+")";
+price = selectedVariant.price;
+}
+
+let item = cart.find(i=>i.name===name);
+
+if(item){ item.qty += qty; }
+else{ cart.push({name,price,qty}); }
+
+save();
+render();
+closeModal();
+}
+
+/* ADD LANGSUNG */
+function addProduct(id){
+let p = products.find(x=>x.id===id);
+let item = cart.find(i=>i.name===p.name);
+
+if(item){ item.qty++; }
+else{ cart.push({name:p.name,price:p.price,qty:1}); }
+
+save();
+render();
+}
+
+/* RENDER */
+function render(){
+let list = document.getElementById("cartList");
+let total = 0;
+list.innerHTML="";
+
+cart.forEach((i,index)=>{
+let sub = i.price * i.qty;
+total += sub;
+
+list.innerHTML += `
+<li>
+${i.name} x${i.qty}
+<button onclick="removeItem(${index})">❌</button>
+</li>`;
+});
+
+document.getElementById("total").innerText="Total: Rp "+total.toLocaleString();
+}
+
+function removeItem(i){
+cart.splice(i,1);
+save();
+render();
+}
+
+/* CHECKOUT */
+function checkout(){
+
+if(cart.length===0){
+alert("Keranjang kosong!");
+return;
+}
+
+let nama = document.getElementById("nama").value || "-";
+let alamat = document.getElementById("alamat").value || "-";
+let metode = document.getElementById("metode").value;
+
+let msg = "*🧾 PESANAN ENAK.EFOODIES*\n\n";
+msg += "*Nama:* "+nama+"\n";
+msg += "*Alamat:* "+alamat+"\n";
+msg += "*Metode:* "+metode+"\n\n";
+
+let total=0;
+
+cart.forEach(i=>{
+let sub=i.price*i.qty;
+total+=sub;
+
+msg += `${i.name} x${i.qty} = Rp ${sub}\n`;
+});
+
+msg += "\nTOTAL: Rp "+total;
+
+window.open("https://wa.me/6282110677862?text="+encodeURIComponent(msg));
+}
+
+function closeModal(){
+modal.style.display="none";
+}
+
+/* INIT */
+render();
+
+</script>
+
+</body>
+</html>
