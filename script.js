@@ -33,6 +33,12 @@ const products = [
     name: "Kue",
     type: "single",
     price: 20000
+},
+{
+    id: 5,
+    name: "Garlic Cheese Bread Mini",
+    type: "single",
+    price: 20000
 }
 ];
 
