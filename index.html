@@ -331,24 +331,29 @@ renderCart();
 
 /* ================= CHECKOUT ================= */
 function checkout(){
-msg += "*📍 Alamat Toko:* Jl.KH Tsanikami L3 blok c";
+
 if(cart.length === 0){
 alert("Keranjang kosong!");
 return;
 }
 
 let msg = "*🧾 PESANAN ENAK.EFOODIES*%0A%0A";
+
+/* alamat toko dipindah ke sini (SETELAH msg dibuat) */
+msg += "*📍 Alamat Toko:* Jl.KH Tsanikami L3 Blok C%0A%0A";
+
 let total = 0;
 
 cart.forEach(i=>{
 let sub = i.price * i.qty;
 total += sub;
+
 msg += `${i.name} x${i.qty} = Rp ${sub}%0A`;
 });
 
 msg += `%0ATotal: Rp ${total}`;
 
-window.open("https://wa.me/6282110677862?text="+msg);
+window.open("https://wa.me/6282110677862?text=" + msg);
 }
 
 /* INIT */
