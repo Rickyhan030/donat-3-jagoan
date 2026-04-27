@@ -7,6 +7,7 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Poppins,sans-serif;}
+
 body{background:#fffaf5;color:#333}
 
 /* NAV */
@@ -89,15 +90,6 @@ margin-top:10px;
 cursor:pointer;
 }
 
-/* INPUT */
-input, select{
-width:100%;
-padding:10px;
-margin-top:10px;
-border-radius:8px;
-border:1px solid #ccc;
-}
-
 /* MODAL */
 #modal{
 display:none;
@@ -125,10 +117,9 @@ cursor:pointer;
 
 <body>
 
-<nav>🍩 Enak.Efoodies</nav>
+<nav>🍩 E foodies</nav>
 
 <section class="hero">
-
 <h1>3 JAGOAN DONAT & BAKERY</h1>
 <p>Fresh dari oven ke rumahmu</p>
 </section>
@@ -160,9 +151,16 @@ cursor:pointer;
 
 <div class="card">
 <img src="bakery-isicoklat.jpg">
-<h3>Bolen Pisang</h3>
+<h3>Bolen pisan raja</h3>
 <p>Rp 30.000</p>
 <button onclick="addProduct(4)">Tambah</button>
+</div>
+
+<div class="card">
+<img src="rotigarlic.jpg">
+<h3>Garlic Cheese Bread Mini</h3>
+<p>Rp 20.000</p>
+<button onclick="addProduct(5)">Tambah</button>
 </div>
 
 </div>
@@ -170,18 +168,8 @@ cursor:pointer;
 <!-- CART -->
 <div class="cart">
 <h3>🛒 Keranjang</h3>
-
 <ul id="cartList"></ul>
 <h4 id="total">Total: Rp 0</h4>
-
-<input type="text" id="nama" placeholder="Nama">
-<input type="text" id="alamat" placeholder="Alamat">
-
-<select id="metode">
-<option value="COD">COD</option>
-<option value="Transfer">Transfer</option>
-</select>
-
 <button class="checkout" onclick="checkout()">Checkout WhatsApp</button>
 </div>
 
@@ -193,6 +181,7 @@ cursor:pointer;
 <div id="variantList"></div>
 
 <br>
+<label>Jumlah</label>
 <input type="number" id="qty" value="1" min="1">
 
 <br><br>
@@ -202,54 +191,76 @@ cursor:pointer;
 
 <script>
 
-/* DATA */
+/* ================= DATA ================= */
 const products = [
 {
-id:1,name:"Donat",type:"variant",
+id:1,
+name:"Donat",
+type:"variant",
 variants:[
-{name:"Donat per Biji",price:5000},
+{name:"Per biji",price:5000},
 {name:"Donat isi 6",price:25000},
 {name:"Donat ulang tahun",price:100000},
 {name:"Bomboloni",price:25000}
-]},
-{id:2,name:"Bolu Besar",type:"single",price:120000},
+]
+},
+{id:2,name:"Bolu",type:"single",price:120000},
 {
-id:3,name:"Pizza",type:"variant",
+id:3,
+name:"Pizza",
+type:"variant",
 variants:[
-{name:"Small",price:25000},
+{name:"Small",price:20000},
 {name:"Regular",price:45000}
-]},
-{id:4,name:"Bolen Pisang",type:"single",price:30000}
+]
+},
+{id:4,name:"Bolen pisang raja",type:"single",price:30000},
+{id:5,name:"Garlic Cheese Bread Mini",type:"single",price:20000}
 ];
 
-/* CART */
+/* ================= CART ================= */
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
 function save(){
 localStorage.setItem("cart", JSON.stringify(cart));
 }
 
-/* MODAL */
-let selectedProduct=null;
-let selectedVariant=null;
+/* ================= ADD PRODUCT ================= */
+function addProduct(id){
+
+let p = products.find(x => x.id === id);
+if(!p){alert("Produk tidak ditemukan");return;}
+
+let item = cart.find(i => i.id === id);
+
+if(item){
+item.qty += 1;
+}else{
+cart.push({id:p.id,name:p.name,price:p.price,qty:1});
+}
+
+save();
+renderCart();
+}
+
+/* ================= MODAL ================= */
+let selectedProduct = null;
+let selectedVariant = null;
 
 function openProduct(id){
-selectedProduct = products.find(p=>p.id===id);
+
+selectedProduct = products.find(p => p.id === id);
 selectedVariant = null;
 
-modal.style.display="block";
-modalTitle.innerText=selectedProduct.name;
+document.getElementById("modal").style.display = "block";
+document.getElementById("modalTitle").innerText = selectedProduct.name;
 
 let list = document.getElementById("variantList");
-list.innerHTML="";
+list.innerHTML = "";
 
-if(selectedProduct.type==="variant"){
 selectedProduct.variants.forEach((v,i)=>{
 list.innerHTML += `<button onclick="selectVariant(${i})">${v.name} - Rp ${v.price}</button>`;
 });
-}else{
-list.innerHTML="Tanpa varian";
-}
 }
 
 function selectVariant(i){
@@ -257,43 +268,46 @@ selectedVariant = selectedProduct.variants[i];
 }
 
 function confirmAdd(){
+
 let qty = parseInt(document.getElementById("qty").value || 1);
 
 let name = selectedProduct.name;
 let price = selectedProduct.price;
 
 if(selectedVariant){
-name += " ("+selectedVariant.name+")";
+name += ` (${selectedVariant.name})`;
 price = selectedVariant.price;
 }
 
-let item = cart.find(i=>i.name===name);
+let item = cart.find(i => i.name === name);
 
-if(item){ item.qty += qty; }
-else{ cart.push({name,price,qty}); }
+if(item){
+item.qty += qty;
+}else{
+cart.push({name,price,qty});
+}
 
 save();
-render();
+renderCart();
 closeModal();
 }
 
-/* ADD LANGSUNG */
-function addProduct(id){
-let p = products.find(x=>x.id===id);
-let item = cart.find(i=>i.name===p.name);
-
-if(item){ item.qty++; }
-else{ cart.push({name:p.name,price:p.price,qty:1}); }
-
-save();
-render();
+function closeModal(){
+document.getElementById("modal").style.display = "none";
 }
 
-/* RENDER */
-function render(){
+/* ================= RENDER ================= */
+function renderCart(){
+
 let list = document.getElementById("cartList");
 let total = 0;
-list.innerHTML="";
+list.innerHTML = "";
+
+if(cart.length === 0){
+list.innerHTML = "<li>Keranjang kosong</li>";
+document.getElementById("total").innerText = "Total: Rp 0";
+return;
+}
 
 cart.forEach((i,index)=>{
 let sub = i.price * i.qty;
@@ -306,54 +320,107 @@ ${i.name} x${i.qty}
 </li>`;
 });
 
-document.getElementById("total").innerText="Total: Rp "+total.toLocaleString();
+document.getElementById("total").innerText = "Total: Rp " + total.toLocaleString();
 }
 
 function removeItem(i){
 cart.splice(i,1);
 save();
-render();
+renderCart();
 }
 
-/* CHECKOUT */
+/* ================= CHECKOUT ================= */
 function checkout(){
-
-if(cart.length===0){
+msg += "*📍 Alamat Toko:* Jl.KH Tsanikami L3 blok c";
+if(cart.length === 0){
 alert("Keranjang kosong!");
 return;
 }
 
-let nama = document.getElementById("nama").value || "-";
-let alamat = document.getElementById("alamat").value || "-";
-let metode = document.getElementById("metode").value;
-
-let msg = "*🧾 PESANAN ENAK.EFOODIES*\n\n";
-msg += "*Nama:* "+nama+"\n";
-msg += "*Alamat:* "+alamat+"\n";
-msg += "*Metode:* "+metode+"\n\n";
-
-let total=0;
+let msg = "*🧾 PESANAN ENAK.EFOODIES*%0A%0A";
+let total = 0;
 
 cart.forEach(i=>{
-let sub=i.price*i.qty;
-total+=sub;
-
-msg += `${i.name} x${i.qty} = Rp ${sub}\n`;
+let sub = i.price * i.qty;
+total += sub;
+msg += `${i.name} x${i.qty} = Rp ${sub}%0A`;
 });
 
-msg += "\nTOTAL: Rp "+total;
+msg += `%0ATotal: Rp ${total}`;
 
-window.open("https://wa.me/6282110677862?text="+encodeURIComponent(msg));
-}
-
-function closeModal(){
-modal.style.display="none";
+window.open("https://wa.me/6282110677862?text="+msg);
 }
 
 /* INIT */
-render();
+renderCart();
 
 </script>
+<footer style="
+background:#2d2d2d;
+color:white;
+text-align:center;
+padding:30px 20px;
+margin-top:40px;
+border-top-left-radius:20px;
+border-top-right-radius:20px;
+">
 
+<h3 style="margin-bottom:10px;">🍩 E-foodies</h3>
+
+<p style="font-size:14px;color:#ccc;">
+Fresh bakery setiap hari • Tanpa pengawet
+</p>
+
+<!-- SOSIAL MEDIA -->
+<div style="margin-top:15px;">
+
+<a href="https://facebook.com/profile.php?id=100070468750103" target="_blank" style="
+margin:5px;
+display:inline-block;
+background:#1877f2;
+padding:8px 12px;
+border-radius:8px;
+color:white;
+text-decoration:none;
+">
+📘 Facebook
+</a>
+
+<a href="https://instagram.com/enak.efoodies?igsh=MXFreGV4M200NzkxNw==" target="_blank" style="
+margin:5px;
+display:inline-block;
+background:#e1306c;
+padding:8px 12px;
+border-radius:8px;
+color:white;
+text-decoration:none;
+">
+📸 Instagram
+</a>
+
+<a href="https://tiktok.com/@maryaulfa232?_r=1&_t=ZS-95tT1h8EGpA" target="_blank" style="
+margin:5px;
+display:inline-block;
+background:#000;
+padding:8px 12px;
+border-radius:8px;
+color:white;
+text-decoration:none;
+">
+🎵 TikTok
+</a>
+
+</div>
+
+<!-- ALAMAT -->
+<p style="margin-top:15px;font-size:13px;color:#bbb;">
+📍 L3 Blok C Tenggarong Seberang
+</p>
+
+<p style="margin-top:10px;font-size:12px;color:#888;">
+© 2021 E-foodies
+</p>
+
+</footer>
 </body>
 </html>
