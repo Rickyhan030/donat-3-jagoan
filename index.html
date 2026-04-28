@@ -189,7 +189,20 @@ opacity:0.9;
 </div>
 
 </div>
+<div style="background:white;padding:15px;border-radius:10px;margin-top:20px;">
 
+<h3>📋 Data Pemesan</h3>
+
+<input type="text" id="nama" placeholder="Nama Anda" style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:1px solid #ccc;">
+
+<select id="metode" style="width:100%;padding:10px;margin-top:10px;border-radius:8px;">
+<option value="Ambil di Toko">Ambil di Toko</option>
+<option value="Delivery">Delivery</option>
+</select>
+
+<input type="text" id="alamat" placeholder="Alamat (isi jika delivery)" style="width:100%;padding:10px;margin-top:10px;border-radius:8px;border:1px solid #ccc;">
+
+</div>
 <!-- CART -->
 <div class="cart">
 <h3>🛒 Keranjang</h3>
@@ -364,27 +377,44 @@ alert("Keranjang kosong!");
 return;
 }
 
-let msg = "*🧾 PESANAN ENAK.EFOODIES*%0A%0A";
+let nama = document.getElementById("nama").value || "Tidak diisi";
+let metode = document.getElementById("metode").value;
+let alamat = document.getElementById("alamat").value || "-";
 
-/* alamat toko dipindah ke sini (SETELAH msg dibuat) */
-msg += "*📍 Alamat Toko:* Jl.KH Tsanikami L3 Blok C%0A%0A";
+/* SIMPAN NAMA */
+localStorage.setItem("namaCustomer", nama);
+
+const nomor = "6282110677862";
+
+let msg = "*🧾 PESANAN ENAK.EFOODIES*\n\n";
+
+msg += "👤 Nama: " + nama + "\n";
+msg += "🚚 Metode: " + metode + "\n";
+
+if(metode === "Delivery"){
+msg += "📍 Alamat: " + alamat + "\n";
+}else{
+msg += "📍 Ambil di toko\n";
+}
+
+msg += "\n----------------------\n";
 
 let total = 0;
 
-cart.forEach(i=>{
-let sub = i.price * i.qty;
+cart.forEach(item=>{
+let sub = item.price * item.qty;
 total += sub;
 
-msg += `${i.name} x${i.qty} = Rp ${sub}%0A`;
+msg += `• ${item.name}\n`;
+msg += `${item.qty} x Rp ${item.price.toLocaleString()}\n`;
+msg += `= Rp ${sub.toLocaleString()}\n\n`;
 });
 
-msg += `%0ATotal: Rp ${total}`;
+msg += "----------------------\n";
+msg += "💰 TOTAL: Rp " + total.toLocaleString();
 
-window.open("https://wa.me/6282110677862?text=" + msg);
+window.open("https://wa.me/" + nomor + "?text=" + encodeURIComponent(msg));
 }
-
-/* INIT */
-renderCart();
 
 </script>
 <footer style="
