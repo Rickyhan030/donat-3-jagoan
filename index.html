@@ -114,7 +114,19 @@ cursor:pointer;
 }
 </style>
 </head>
-
+<div id="notif" style="
+position:fixed;
+top:20px;
+right:20px;
+background:#25d366;
+color:white;
+padding:10px 15px;
+border-radius:8px;
+display:none;
+z-index:999;
+">
+✔ Ditambahkan ke keranjang
+</div>
 <body>
 
 <nav>🍩 E foodies</nav>
@@ -281,6 +293,7 @@ cart.push({id:p.id,name:p.name,price:p.price,qty:1});
 
 save();
 renderCart();
+showNotif();
 }
 
 /* ================= MODAL ================= */
@@ -329,6 +342,7 @@ cart.push({name,price,qty});
 
 save();
 renderCart();
+showNotif();
 closeModal();
 }
 
@@ -414,6 +428,20 @@ msg += "----------------------\n";
 msg += "💰 TOTAL: Rp " + total.toLocaleString();
 
 window.open("https://wa.me/" + nomor + "?text=" + encodeURIComponent(msg));
+}
+
+function showNotif(){
+let n = document.getElementById("notif");
+if(!n) return;
+
+n.style.display = "block";
+n.style.opacity = "1";
+n.style.transform = "translateY(0)";
+
+setTimeout(()=>{
+n.style.opacity = "0";
+n.style.transform = "translateY(-20px)";
+},2000);
 }
 
 </script>
